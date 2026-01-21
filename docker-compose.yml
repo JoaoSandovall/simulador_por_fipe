@@ -1,0 +1,10 @@
+services:
+  web:
+    build: .
+    container_name: site_fipe
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+    env_file:
+      - .env
