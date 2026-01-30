@@ -1,0 +1,40 @@
+/* Estilo para as etiquetas (labels) */
+.label-form {
+    display: block;
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 600;    /* font-semibold */
+    color: #475569;      /* text-slate-600 */
+    margin-bottom: 0.25rem; /* mb-1 */
+}
+
+/* Estilo para os campos de seleção (selects) */
+.input-form {
+    width: 100%;
+    padding: 0.75rem;    /* p-3 */
+    border: 1px solid #e2e8f0; /* border-slate-200 */
+    border-radius: 0.5rem;     /* rounded-lg */
+    background-color: #f8fafc; /* bg-slate-50 */
+    outline: none;
+    transition: all 0.2s;      /* transition-all */
+}
+
+/* Efeito quando o usuário clica no campo */
+.input-form:focus {
+    border-color: #3b82f6;     /* focus:border-blue-500 */
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* focus:ring-2 */
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}

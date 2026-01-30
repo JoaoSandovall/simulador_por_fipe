@@ -1,39 +1,56 @@
+from flask import Flask, jsonify, request, render_template
 import requests
-from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-FIPE_API_URL = "https://parallelum.com.br/fipe/api/v1/carros/marcas"
+BASE_URL = "https://parallelum.com.br/fipe/api/v1/carros/marcas"
 
 @app.route('/')
-def index():
-    return "Servidor funcionando"
+def home():
+    return render_template("index.html")
 
-@app.route('/buscar_marcas')
-def buscar_marcas():
-    response = requests.get(FIPE_API_URL)
-    return jsonify(response.json())
+# 1. Lista de marcas 
+@app.route('/marcas')
+def get_marcas():
+    try:
+        response = requests.get(BASE_URL)
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
 
-@app.route('/simular')
-def simular():
-    valor_veiculo = float(request.args.get('valor', 0))
-    entrada = float(request.args.get('entrada', 0))
-    n_parcelas = float(request.args.get("parcels", 48))
-    taxa = 0.018
+# 2. Lista de Modelos de uma Marca
+@app.route('/marcas/<marca_id>/modelos')
+def get_modelos(marca_id):
+    url = f"{BASE_URL}/{marca_id}/modelos"
+    return jsonify(requests.get(url).json())
 
-    if valor_veiculo <= entrada:
-        return jsonify({"erro": "A entrada deve ser menor que o valor do veículo."})
+@app.route('/valor/<marca_id>/<modelo_id>/<ano_id>')
+def get_valor(marca_id, modelo_id, ano_id):
     
-    valor_financiado = valor_veiculo - entrada
+    entrada_usuario = float(requests.args.get('entrada', 0))
+    taxa_usuario = float(request.args.get('juros', 1.5)) / 100
 
-    parcela = valor_financiado * (taxa * (1 + taxa)**n_parcelas) / ((1 + taxa)**n_parcelas - 1)
+    url = f"{BASE_URL}/{marca_id}/modelos/{modelo_id}/ano/{ano_id}"
+    dados_fipe = request.get(url).json()
+
+    valor_str = dados_fipe.get('Valor', '0').replace('R$ ', '').replace('.', '').replace('.', '')
+    valor_total = float(valor_str)
+
+    if entrada_usuario >= valor_total:
+        return jsonify({"erro": "A entrada não pode ser mairo que o valor do carro!"})
+    
+    valor_financiado = valor_total - entrada_usuario
+    meses = 48
+    parcela = valor_financiado * (taxa_usuario * (1 + taxa_usuario)**meses) / ((1 + taxa_usuario)**meses - 1)
 
     return jsonify({
-        "valor_do_carro": valor_veiculo,
-        "valor_financiado": valor_financiado,
-        "valor_da_parcela": round(parcela, 2),
-        "total_pago_no_final": round(parcela * n_parcelas, 2),
-        "juros_pagos": round((parcela * n_parcelas) - valor_financiado, 2)
+        "carro": f"{dados_fipe['Marca']} {dados_fipe['Modelo']}",
+        "ano": dados_fipe['AnoModelo'],
+        "preco_tabela": dados_fipe['Valor'],
+        "simulacao_48x": {
+            "parcela": f"R$ {parcela:,.2f}",
+            "total_final": f"R$ {(parcela * meses) + entrada_usuario:,.2f}"
+        }
     })
 
 if __name__ == "__main__":
