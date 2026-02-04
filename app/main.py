@@ -26,27 +26,34 @@ def get_modelos(marca_id):
 
 @app.route('/valor/<marca_id>/<modelo_id>/<ano_id>')
 def get_valor(marca_id, modelo_id, ano_id):
-    
-    entrada_usuario = float(requests.args.get('entrada', 0))
+
+    entrada_usuario = float(request.args.get('entrada', 0))
     taxa_usuario = float(request.args.get('juros', 1.5)) / 100
+    url = f"{BASE_URL}/{marca_id}/modelos/{modelo_id}/anos/{ano_id}"
 
-    url = f"{BASE_URL}/{marca_id}/modelos/{modelo_id}/ano/{ano_id}"
-    dados_fipe = request.get(url).json()
+    response = requests.get(url)
+    dados_fipe = response.json()
 
-    valor_str = dados_fipe.get('Valor', '0').replace('R$ ', '').replace('.', '').replace('.', '')
-    valor_total = float(valor_str)
+    valor_raw = dados_fipe.get('Valor', '0')
+    valor_limpo = valor_raw.replace('R$ ', '').replace('.', '').replace(',', '.')
+    valor_total = float(valor_limpo)
 
-    if entrada_usuario >= valor_total:
-        return jsonify({"erro": "A entrada não pode ser mairo que o valor do carro!"})
-    
+    if entrada_usuario >= valor_total and entrada_usuario > 0:
+        return jsonify({"erro": "A entrada não pode ser maior que o valor do carro!"}), 400
+
     valor_financiado = valor_total - entrada_usuario
     meses = 48
-    parcela = valor_financiado * (taxa_usuario * (1 + taxa_usuario)**meses) / ((1 + taxa_usuario)**meses - 1)
+
+    if valor_financiado > 0:
+        parcela = valor_financiado * (taxa_usuario * (1 + taxa_usuario)**meses) / ((1 + taxa_usuario)**meses - 1)
+    else:
+        parcela = 0
 
     return jsonify({
         "carro": f"{dados_fipe['Marca']} {dados_fipe['Modelo']}",
         "ano": dados_fipe['AnoModelo'],
-        "preco_tabela": dados_fipe['Valor'],
+        "preco_tabela": valor_raw,
+        "valor": valor_total,
         "simulacao_48x": {
             "parcela": f"R$ {parcela:,.2f}",
             "total_final": f"R$ {(parcela * meses) + entrada_usuario:,.2f}"
