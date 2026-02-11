@@ -6,7 +6,7 @@ function inicializarBuscadores() {
         labelField: 'nome',
         searchField: 'nome',
         placeholder: "Digite a marca...",
-        disable: true,
+        disabled: true,
         onChange: carregarModelos
     });
 
@@ -15,15 +15,16 @@ function inicializarBuscadores() {
         labelField: 'nome',
         searchField: 'nome',
         placeholder: "Digite o modelo...",
-        disable: true,
+        disabled: true,
         onChange: carregarAnos
     });
 
     tsAno = new TomSelect("#select-ano", {
+        valueField: 'codigo',
         labelField: 'nome',
         searchField: 'nome',
         placeholder: "Digite o ano...",
-        disable: true,
+        disabled: true,
         onChange: exibirApenasPreco
     });
 }
@@ -36,9 +37,15 @@ async function carregarMarcas() {
     tsMarca.addOptions(marcas);
 }
 
-async function carregarModelos() {
+async function carregarModelos(marcaId) {
 
     if (!marcaId) return;
+
+    tsModelo.clear();
+    tsAno.clear();
+    tsAno.clearOptions();
+    tsAno.disable();
+    tsModelo.clearOptions();
 
     const res = await fetch(`/marcas/${marcaId}/modelos`);
     const dados = await res.json();
@@ -48,22 +55,25 @@ async function carregarModelos() {
     tsModelo.enable();
 }
 
-async function carregarAnos() {
+async function carregarAnos(modeloId) {
     const marcaId = tsMarca.getValue();
     if (!modeloId || !marcaId) return;
+
+    tsAno.clear();
+    tsAno.clearOptions();
 
     const res = await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaId}/modelos/${modeloId}/anos`);
     const anos = await res.json();
 
     tsAno.clearOptions();
-    tsAno.addOptions();
+    tsAno.addOptions(anos);
     tsAno.enable();
 }
 
 async function exibirApenasPreco() {
-    const marcaId = document.getElementById('select-marca').value;
-    const modeloId = document.getElementById('select-modelo').value;
-    const anoId = document.getElementById('select-ano').value;
+    const marcaId = tsMarca.getValue();
+    const modeloId = tsModelo.getValue();
+    const anoId = tsAno.getValue();
 
     if (!anoId) return;
 
@@ -79,9 +89,9 @@ async function exibirApenasPreco() {
 }
 
 async function buscarResultado() {
-    const marcaId = document.getElementById('select-marca').value;
-    const modeloId = document.getElementById('select-modelo').value;
-    const anoId = document.getElementById('select-ano').value;
+    const marcaId = tsMarca.getValue();
+    const modeloId = tsModelo.getValue();
+    const anoId = tsAno.getValue();
     const entrada = document.getElementById('input-entrada').value || 0;
     const juros = document.getElementById('input-juros').value || 1.5;
 
