@@ -29,6 +29,7 @@ def get_valor(marca_id, modelo_id, ano_id):
 
     entrada_usuario = float(request.args.get('entrada', 0))
     taxa_usuario = float(request.args.get('juros', 1.5)) / 100
+    meses = int(request.args.get('meses', 48))
     url = f"{BASE_URL}/{marca_id}/modelos/{modelo_id}/anos/{ano_id}"
 
     response = requests.get(url)
@@ -46,19 +47,27 @@ def get_valor(marca_id, modelo_id, ano_id):
 
     if valor_financiado > 0:
         parcela = valor_financiado * (taxa_usuario * (1 + taxa_usuario)**meses) / ((1 + taxa_usuario)**meses - 1)
+        
+        total_pago_financiamento = parcela * meses
+        juros_total = total_pago_financiamento - valor_financiado
+        total_geral = total_pago_financiamento + entrada_usuario
+
     else:
         parcela = 0
+        juros_total = 0
+        total_geral = valor_total
 
     return jsonify({
-        "carro": f"{dados_fipe['Marca']} {dados_fipe['Modelo']}",
-        "ano": dados_fipe['AnoModelo'],
-        "preco_tabela": valor_raw,
-        "valor": valor_total,
-        "simulacao_48x": {
-            "parcela": f"R$ {parcela:,.2f}",
-            "total_final": f"R$ {(parcela * meses) + entrada_usuario:,.2f}"
-        }
-    })
+    "carro": f"{dados_fipe['Marca']} {dados_fipe['Modelo']}",
+    "ano": dados_fipe['AnoModelo'],
+    "preco_tabela": valor_raw,
+    "simulacao": {
+        "parcela": f"R$ {parcela:,.2f}",
+        "total_juros": f"R$ {juros_total:,.2f}",
+        "total_pago": f"R$ {total_geral:,.2f}",
+        "meses": meses
+    }
+})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8000, debug=True)

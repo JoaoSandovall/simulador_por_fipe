@@ -94,13 +94,14 @@ async function buscarResultado() {
     const anoId = tsAno.getValue();
     const entrada = document.getElementById('input-entrada').value || 0;
     const juros = document.getElementById('input-juros').value || 1.5;
+    const parcelas = document.getElementById('input-parcelas').value;
 
     if (!anoId) {
         alert("Por favor, selecione o carro completo primeiro!");
         return;
     }
 
-    const res = await fetch(`/valor/${marcaId}/${modeloId}/${anoId}?entrada=${entrada}&juros=${juros}`);
+    const res = await fetch(`/valor/${marcaId}/${modeloId}/${anoId}?entrada=${entrada}&juros=${juros}&meses=${parcelas}`);
     const data = await res.json();
 
     if (data.erro) {
@@ -108,8 +109,13 @@ async function buscarResultado() {
         return;
     }
     
-    document.getElementById('res-parcela').innerText = data.simulacao_48x.parcela;
+    document.getElementById('res-carro').innerText = `${data.carro} (${data.ano})`;
+    document.getElementById('res-preco').innerText = data.preco_tabela;
+    document.getElementById('res-parcela').innerText = data.simulacao.parcela;
+    document.getElementById('res-juros-total').innerText = data.simulacao.total_juros;
+    document.getElementById('res-total-geral').innerText = data.simulacao.total_pago;
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarBuscadores();
