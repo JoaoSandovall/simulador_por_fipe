@@ -43,7 +43,6 @@ def get_valor(marca_id, modelo_id, ano_id):
         return jsonify({"erro": "A entrada não pode ser maior que o valor do carro!"}), 400
 
     valor_financiado = valor_total - entrada_usuario
-    meses = 48
 
     if valor_financiado > 0:
         parcela = valor_financiado * (taxa_usuario * (1 + taxa_usuario)**meses) / ((1 + taxa_usuario)**meses - 1)
@@ -51,23 +50,22 @@ def get_valor(marca_id, modelo_id, ano_id):
         total_pago_financiamento = parcela * meses
         juros_total = total_pago_financiamento - valor_financiado
         total_geral = total_pago_financiamento + entrada_usuario
-
     else:
         parcela = 0
         juros_total = 0
         total_geral = valor_total
 
     return jsonify({
-    "carro": f"{dados_fipe['Marca']} {dados_fipe['Modelo']}",
-    "ano": dados_fipe['AnoModelo'],
-    "preco_tabela": valor_raw,
-    "simulacao": {
-        "parcela": f"R$ {parcela:,.2f}",
-        "total_juros": f"R$ {juros_total:,.2f}",
-        "total_pago": f"R$ {total_geral:,.2f}",
-        "meses": meses
-    }
-})
+        "carro": f"{dados_fipe['Marca']} {dados_fipe['Modelo']}",
+        "ano": dados_fipe['AnoModelo'],
+        "preco_tabela": valor_raw,
+        "simulacao": { 
+            "parcela": f"R$ {parcela:,.2f}",
+            "total_juros": f"R$ {juros_total:,.2f}", 
+            "total_pago": f"R$ {total_geral:,.2f}",  
+            "meses": meses                          
+        }
+    })
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8000, debug=True)

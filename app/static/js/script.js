@@ -109,11 +109,10 @@ async function buscarResultado() {
         return;
     }
     
-    document.getElementById('res-carro').innerText = `${data.carro} (${data.ano})`;
-    document.getElementById('res-preco').innerText = data.preco_tabela;
     document.getElementById('res-parcela').innerText = data.simulacao.parcela;
     document.getElementById('res-juros-total').innerText = data.simulacao.total_juros;
     document.getElementById('res-total-geral').innerText = data.simulacao.total_pago;
+    document.getElementById('res-meses-label').innerText = `(${data.simulacao.meses}x)`;
 }
 
 
