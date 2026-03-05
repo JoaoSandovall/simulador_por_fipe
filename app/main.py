@@ -1,7 +1,11 @@
 from flask import Flask, jsonify, request, render_template
 import requests
 
-app = Flask(__name__)
+app = Flask(__name__,
+            template_folder='templates',
+            static_folder='static')
+
+app.debbug = True
 
 BASE_URL = "https://parallelum.com.br/fipe/api/v1/carros/marcas"
 
