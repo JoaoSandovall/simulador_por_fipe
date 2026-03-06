@@ -5,8 +5,6 @@ app = Flask(__name__,
             template_folder='templates',
             static_folder='static')
 
-app.debbug = True
-
 BASE_URL = "https://parallelum.com.br/fipe/api/v1/carros/marcas"
 
 @app.route('/')
@@ -28,14 +26,19 @@ def get_modelos(marca_id):
     url = f"{BASE_URL}/{marca_id}/modelos"
     return jsonify(requests.get(url).json())
 
+@app.route('/marcas/<marca_id>/modelos/<modelo_id>/anos')
+def get_anos(marca_id, modelo_id):
+    url = f"{BASE_URL}/{marca_id}/modelos/{modelo_id}/anos"
+    return jsonify(requests.get(url).json())
+
 @app.route('/valor/<marca_id>/<modelo_id>/<ano_id>')
 def get_valor(marca_id, modelo_id, ano_id):
 
     entrada_usuario = float(request.args.get('entrada', 0))
     taxa_usuario = float(request.args.get('juros', 1.5)) / 100
     meses = int(request.args.get('meses', 48))
+    
     url = f"{BASE_URL}/{marca_id}/modelos/{modelo_id}/anos/{ano_id}"
-
     response = requests.get(url)
     dados_fipe = response.json()
 
@@ -50,7 +53,6 @@ def get_valor(marca_id, modelo_id, ano_id):
 
     if valor_financiado > 0:
         parcela = valor_financiado * (taxa_usuario * (1 + taxa_usuario)**meses) / ((1 + taxa_usuario)**meses - 1)
-        
         total_pago_financiamento = parcela * meses
         juros_total = total_pago_financiamento - valor_financiado
         total_geral = total_pago_financiamento + entrada_usuario

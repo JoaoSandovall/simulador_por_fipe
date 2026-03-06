@@ -62,7 +62,7 @@ async function carregarAnos(modeloId) {
     tsAno.clear();
     tsAno.clearOptions();
 
-    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaId}/modelos/${modeloId}/anos`);
+    const res = await fetch(`/marcas/${marcaId}/modelos/${modeloId}/anos`);
     const anos = await res.json();
 
     tsAno.clearOptions();
