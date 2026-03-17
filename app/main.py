@@ -11,7 +11,6 @@ BASE_URL = "https://parallelum.com.br/fipe/api/v1/carros/marcas"
 def home():
     return render_template("index.html")
 
-# 1. Lista de marcas 
 @app.route('/marcas')
 def get_marcas():
     try:
@@ -20,7 +19,6 @@ def get_marcas():
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-# 2. Lista de Modelos de uma Marca
 @app.route('/marcas/<marca_id>/modelos')
 def get_modelos(marca_id):
     url = f"{BASE_URL}/{marca_id}/modelos"
@@ -52,10 +50,15 @@ def get_valor(marca_id, modelo_id, ano_id):
     valor_financiado = valor_total - entrada_usuario
 
     if valor_financiado > 0:
-        parcela = valor_financiado * (taxa_usuario * (1 + taxa_usuario)**meses) / ((1 + taxa_usuario)**meses - 1)
+        if taxa_usuario <= 0:
+            parcela = valor_financiado / meses if meses > 0 else 0
+        else:
+            parcela = valor_financiado * (taxa_usuario * (1 + taxa_usuario)**meses) / ((1 + taxa_usuario)**meses - 1)
+    
         total_pago_financiamento = parcela * meses
         juros_total = total_pago_financiamento - valor_financiado
         total_geral = total_pago_financiamento + entrada_usuario
+
     else:
         parcela = 0
         juros_total = 0
